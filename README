@@ -1,0 +1,9 @@
+Generador de constancias.
+
+El archivo que hay que invocar es generar_constancias.php. Aquí está lo que hace:
+
+1. Busca en una table de BD los nombres + emails de las personas a las que 
+hay que enviarles constancia.
+2. Toma una plantilla (PDF predisenado pero sin el nombre de la persona) y
+llena el nombre de la persona en las coordenadas correspondientes (hay que tantearle)
+3. Guarda el archivo generado y manda a la persona un mail con el link para que lo descargue.
