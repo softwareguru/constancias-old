@@ -1,7 +1,7 @@
 <?php
-define('FPDF_FONTPATH','font/');
-require_once('fpdf.php');
-require_once('fpdi.php');
+define('FPDF_FONTPATH','lib/fpdf/font/');
+require_once('lib/fpdf/fpdf.php');
+require_once('lib/fpdi/fpdi.php');
 ?>
 
 <html>
@@ -13,19 +13,21 @@ require_once('fpdi.php');
 <?php
 
 $dbhost = 'localhost';
-$dbuser = 'user';
-$dbpass = 'password';
+// Sustituir user y password
+$dbuser = 'db_user';
+$dbpass = 'db_password';
 
 $conn = mysql_connect($dbhost, $dbuser, $dbpass) or die                      ('Error connecting to mysql');
 
-$dbname = 'dev';
+// Sustituir nombre de base de datos
+$dbname = 'constancias';
 mysql_select_db($dbname);
 
 $query_txt = "select c.id, nombre_participante as nombre, email, nombre_evento, template_file, coords_x, coords_y
 from constancias_generar c, constancias_template t
 where c.template_id = t.id
 AND generada = 0
-limit 0, 20";
+limit 0, 100";
 
 $result=mysql_query($query_txt);
 
@@ -57,23 +59,24 @@ while($row = mysql_fetch_array($result))
     $pdf->Cell(100, 0, $nombre, 0, 0,"C");
 
     $pdf->setDisplayMode("real");
-    $filename = "results/".urlencode($nombreEvento." - ".$email).".pdf";
+    $filename = "results/".urlencode($nombreEvento."-".$nombre).".pdf";
     $pdf->Output($filename, 'F');
 
     echo "Escribi ".$filename."\n<br />\n";
 
     $filename = str_replace("%", "%25", $filename);
 
+/*
     $subject = "Constancia de ".$nombreEvento;
     $message = $message0;
     $message .= "Puedes descargarla en ".$serverpath.$filename;
     $message .= "\n\nAtentamente,\n Staff SG";
-
+*/
     mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
 
-    mail($email, $subject, $message, $headers);
-// Esperamos medio segundo para no inundar el mail server. 
-    usleep(500000);
+//  mail($email, $subject, $message, $headers);
+//  Esperamos .1 segundo para no inundar la maquina. 
+    usleep(100000);
 
 }
 
