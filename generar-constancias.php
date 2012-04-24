@@ -14,20 +14,21 @@ require_once('lib/fpdi/fpdi.php');
 
 $dbhost = 'localhost';
 // Sustituir user y password
-$dbuser = 'db_user';
-$dbpass = 'db_password';
+$dbuser = 'sgvirtual';
+$dbpass = 'temistocles';
 
 $conn = mysql_connect($dbhost, $dbuser, $dbpass) or die                      ('Error connecting to mysql');
 
 // Sustituir nombre de base de datos
-$dbname = 'constancias';
+$dbname = 'sgvirtual2012';
 mysql_select_db($dbname);
 
-$query_txt = "select c.id, nombre_participante as nombre, email, nombre_evento, template_file, coords_x, coords_y
+$query_txt = "select c.id, nombre_participante as nombre, email, tag, 
+nombre_evento, template_file, coords_x, coords_y
 from constancias_generar c, constancias_template t
 where c.template_id = t.id
 AND generada = 0
-limit 0, 100";
+limit 0, 20";
 
 $result=mysql_query($query_txt);
 
@@ -42,6 +43,9 @@ while($row = mysql_fetch_array($result))
     $constanciaId = $row["id"];
     $nombre = $row["nombre"];
     $email = $row["email"];
+    $tag = $row["tag"];
+    if(strlen($tag))
+      $tag = $tag ."/";
     $nombreEvento = $row["nombre_evento"];
     $templatePath = "templates/".$row["template_file"];
     $coordsX = $row["coords_x"];
@@ -53,29 +57,28 @@ while($row = mysql_fetch_array($result))
     $tplidx = $pdf->importPage(1, '/MediaBox');
     $pdf->addPage("P", "Letter");
     $pdf->useTemplate($tplidx);
-    $pdf->SetFont('Helvetica','B',18);
+    $pdf->SetFont('Helvetica','B',20);
 
     $pdf->SetXY((int)$coordsX,(int)$coordsY);
     $pdf->Cell(100, 0, $nombre, 0, 0,"C");
 
     $pdf->setDisplayMode("real");
-    $filename = "results/".urlencode($nombreEvento."-".$nombre).".pdf";
+    $filename = "results/".$tag.urlencode($nombreEvento."-".$nombre).".pdf";
     $pdf->Output($filename, 'F');
 
     echo "Escribi ".$filename."\n<br />\n";
 
     $filename = str_replace("%", "%25", $filename);
 
-/*
+
     $subject = "Constancia de ".$nombreEvento;
     $message = $message0;
-    $message .= "Puedes descargarla en ".$serverpath.$filename;
+    $message .= "Puedes descargarla en http://sg.com.mx/sgvirtual/2012/constancias/".$filename;
     $message .= "\n\nAtentamente,\n Staff SG";
-*/
+
     mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
 
-//  mail($email, $subject, $message, $headers);
-//  Esperamos .1 segundo para no inundar la maquina. 
+    mail($email, $subject, $message, $headers);
     usleep(100000);
 
 }
