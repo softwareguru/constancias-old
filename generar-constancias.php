@@ -12,15 +12,18 @@ require_once('lib/fpdi/fpdi.php');
 
 <?php
 
+$constanciasDir = "/var/www/constancias";
+$baseUrl = "http://vps3.sg.com.mx/constancias";
+
 $dbhost = 'localhost';
 // Sustituir user y password
-$dbuser = 'sgvirtual';
-$dbpass = 'temistocles';
+$dbuser = 'constancias';
+$dbpass = 'constancias';
 
 $conn = mysql_connect($dbhost, $dbuser, $dbpass) or die                      ('Error connecting to mysql');
 
 // Sustituir nombre de base de datos
-$dbname = 'sgvirtual2012';
+$dbname = 'constancias';
 mysql_select_db($dbname);
 
 $query_txt = "select c.id, nombre_participante as nombre, email, tag, 
@@ -28,12 +31,12 @@ nombre_evento, template_file, coords_x, coords_y
 from constancias_generar c, constancias_template t
 where c.template_id = t.id
 AND generada = 0
-limit 0, 20";
+limit 0, 40";
 
 $result=mysql_query($query_txt);
 
 // Email template
-$subject = "Constancia ";
+$subject = "Constancia de ";
 $message0 = "Te informamos que tu constancia ya fue generada.\n\n";
 $headers = "From: eventos@sg.com.mx";
 
@@ -44,8 +47,6 @@ while($row = mysql_fetch_array($result))
     $nombre = $row["nombre"];
     $email = $row["email"];
     $tag = $row["tag"];
-    if(strlen($tag))
-      $tag = $tag ."/";
     $nombreEvento = $row["nombre_evento"];
     $templatePath = "templates/".$row["template_file"];
     $coordsX = $row["coords_x"];
@@ -57,29 +58,32 @@ while($row = mysql_fetch_array($result))
     $tplidx = $pdf->importPage(1, '/MediaBox');
     $pdf->addPage("P", "Letter");
     $pdf->useTemplate($tplidx);
-    $pdf->SetFont('Helvetica','B',20);
+    $pdf->AddFont('MrDafoe', '', 'MrDafoe.php');
+    $pdf->SetFont('MrDafoe','',32);
 
     $pdf->SetXY((int)$coordsX,(int)$coordsY);
     $pdf->Cell(100, 0, $nombre, 0, 0,"C");
 
     $pdf->setDisplayMode("real");
-    $filename = "results/".$tag.urlencode($nombreEvento."-".$nombre).".pdf";
-    $pdf->Output($filename, 'F');
+    $filename = $tag."/".urlencode($nombre).".pdf";
+    $absFilename = $constanciasDir."/results/".$filename;
+    $pdf->Output($absFilename, 'F');
 
     echo "Escribi ".$filename."\n<br />\n";
 
     $filename = str_replace("%", "%25", $filename);
 
-
     $subject = "Constancia de ".$nombreEvento;
     $message = $message0;
-    $message .= "Puedes descargarla en http://sg.com.mx/sgvirtual/2012/constancias/".$filename;
+    $message .= "Puedes descargarla en ".$baseUrl."/".$filename;
     $message .= "\n\nAtentamente,\n Staff SG";
 
     mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
 
-    mail($email, $subject, $message, $headers);
-    usleep(100000);
+    if($email != "nomail") {
+      mail($email, $subject, $message, $headers);
+      usleep(100000);
+    }
 
 }
 
