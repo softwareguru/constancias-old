@@ -2,6 +2,8 @@
 define('FPDF_FONTPATH','lib/fpdf/font/');
 require_once('lib/fpdf/fpdf.php');
 require_once('lib/fpdi/fpdi.php');
+require_once('lib/PHPMailer/PHPMailerAutoload.php');
+require_once('constants.php');
 ?>
 
 <html>
@@ -12,33 +14,43 @@ require_once('lib/fpdi/fpdi.php');
 
 <?php
 
-$constanciasDir = "/var/www/constancias";
-$baseUrl = "http://vps3.sg.com.mx/constancias";
+// $constanciasDir = "/var/www/constancias";
+// $baseUrl = "http://vps3.sg.com.mx/constancias";
 
 $dbhost = 'localhost';
 // Sustituir user y password
-$dbuser = 'constancias';
-$dbpass = 'constancias';
+// $dbuser = 'constancias';
+// $dbpass = 'constancias';
 
-$conn = mysql_connect($dbhost, $dbuser, $dbpass) or die                      ('Error connecting to mysql');
+$conn = mysql_connect( DBHOST, DBUSER, DBPASS) or die                      ('Error connecting to mysql');
 
 // Sustituir nombre de base de datos
-$dbname = 'constancias';
-mysql_select_db($dbname);
+mysql_select_db(DBNAME);
 
 $query_txt = "select c.id, nombre_participante as nombre, email, tag, 
 nombre_evento, template_file, coords_x, coords_y
 from constancias_generar c, constancias_template t
 where c.template_id = t.id
 AND generada = 0
-limit 0, 40";
+limit 0, 50";
 
 $result=mysql_query($query_txt);
 
 // Email template
 $subject = "Constancia de ";
 $message0 = "Te informamos que tu constancia ya fue generada.\n\n";
-$headers = "From: eventos@sg.com.mx";
+
+    $mail = new PHPMailer;
+    $mail->isSMTP();                                      // Set mailer to use SMTP
+    $mail->Host = SMTPHOST;  // Specify main and backup SMTP servers
+    $mail->SMTPAuth = true;                               // Enable SMTP authentication
+    $mail->Username = SMTPUSER;                 // SMTP username
+    $mail->Password = SMTPPASS;                           // SMTP password
+    $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+    $mail->Port = 587;                                    // TCP port to connect to
+    $mail->From = SENDEREMAIL;
+    $mail->FromName = SENDERNAME;
+    $mail->isHTML(false);
 
 // Iterar por cada renglón
 while($row = mysql_fetch_array($result))
@@ -66,25 +78,30 @@ while($row = mysql_fetch_array($result))
 
     $pdf->setDisplayMode("real");
     $filename = $tag."/".urlencode($nombre).".pdf";
-    $absFilename = $constanciasDir."/results/".$filename;
+    $absFilename = RESULTSDIR."/".$filename;
     $pdf->Output($absFilename, 'F');
 
     echo "Escribi ".$filename."\n<br />\n";
 
     $filename = str_replace("%", "%25", $filename);
 
-    $subject = "Constancia de ".$nombreEvento;
     $message = $message0;
-    $message .= "Puedes descargarla en ".$baseUrl."/".$filename;
+    $message .= "Puedes descargarla en ".BASEURL."/".$filename;
     $message .= "\n\nAtentamente,\n Staff SG";
 
-    mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
+    $mail->Subject = "Constancia de ".$nombreEvento;
+    $mail->clearAddresses();       // remove previous recipient
+    $mail->addAddress($email);     // add a recipient
+    $mail->Body    = $message;
 
-    if($email != "nomail") {
-      mail($email, $subject, $message, $headers);
-      usleep(100000);
+    if(!$mail->Send()) {
+       echo 'Message could not be sent.';
+       echo 'Mailer Error: ' . $mail->ErrorInfo;
+       break;
+    } else {
+        echo "Message sent to: ".$email."\n";
+        mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
     }
-
 }
 
 mysql_close();
