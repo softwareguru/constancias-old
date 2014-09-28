@@ -14,17 +14,7 @@ require_once('constants.php');
 
 <?php
 
-// $constanciasDir = "/var/www/constancias";
-// $baseUrl = "http://vps3.sg.com.mx/constancias";
-
-$dbhost = 'localhost';
-// Sustituir user y password
-// $dbuser = 'constancias';
-// $dbpass = 'constancias';
-
 $conn = mysql_connect( DBHOST, DBUSER, DBPASS) or die                      ('Error connecting to mysql');
-
-// Sustituir nombre de base de datos
 mysql_select_db(DBNAME);
 
 $query_txt = "select c.id, nombre_participante as nombre, email, tag, 
@@ -63,6 +53,11 @@ while($row = mysql_fetch_array($result))
     $templatePath = "templates/".$row["template_file"];
     $coordsX = $row["coords_x"];
     $coordsY = $row["coords_y"];
+
+    $absDir = RESULTSDIR."/".$tag;
+    if (!file_exists($absDir)) {
+        mkdir($absDir, 0755, true);
+    }
 
     $pdf =& new FPDI();
 
