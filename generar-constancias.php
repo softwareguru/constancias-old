@@ -14,7 +14,7 @@ require_once('constants.php');
 
 <?php
 
-$conn = mysql_connect( DBHOST, DBUSER, DBPASS) or die                      ('Error connecting to mysql');
+$conn = mysql_connect( DBHOST, DBUSER, DBPASS) or die ('Error connecting to mysql');
 mysql_select_db(DBNAME);
 
 $query_txt = "select c.id, nombre_participante as nombre, email, tag, 
