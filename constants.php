@@ -3,15 +3,15 @@
 // Defines constants for use in generar-constancias.php
 
 define ("RESULTSDIR", "/var/www/constancias/results");
-define ("BASEURL", "http://vps3.sg.com.mx/constancias");
+define ("BASEURL", "http://tuserver");
 define ("DBHOST", "localhost");
 define ("DBNAME", "constancias");
 define ("DBUSER", "constancias");
 define ("DBPASS", "constancias");
-define ("SENDEREMAIL", "eventos@sg.com.mx");
-define ("SENDERNAME", "SG Eventos");
-define ("SMTPHOST", "smtp.mandrillapp.com");
-define ("SMTPUSER", "softwareguru");
-define ("SMTPPASS", "FtkiQdyQRIyq-0ZZSvp5XQ");
+define ("SENDEREMAIL", "remitente@tudominio.com");
+define ("SENDERNAME", "Nombre Remitente");
+define ("SMTPHOST", "smtpserver");
+define ("SMTPUSER", "smtpuser");
+define ("SMTPPASS", "smtppassword");
 
 ?>
