@@ -80,16 +80,15 @@ while($row = mysql_fetch_array($result))
 
     $filename = str_replace("%", "%25", $filename);
 
-    $message = $message0;
-    $message .= "Puedes descargarla en ".BASEURL."/".$filename;
-    $message .= "\n\nAtentamente,\n Staff SG";
+    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = $message0;
+        $message .= "Puedes descargarla en ".BASEURL."/".$filename;
+        $message .= "\n\nAtentamente,\n Staff SG";
+        $mail->Subject = "Constancia de ".$nombreEvento;
+        $mail->clearAddresses();       // remove previous recipient
+        $mail->addAddress($email);     // add a recipient
+        $mail->Body    = $message;
 
-    $mail->Subject = "Constancia de ".$nombreEvento;
-    $mail->clearAddresses();       // remove previous recipient
-    $mail->addAddress($email);     // add a recipient
-    $mail->Body    = $message;
-
-    if (filter_var($email_a, FILTER_VALIDATE_EMAIL)
         if(!$mail->Send()) {
             echo "Message could not be sent.";
             echo "Mailer Error: " . $mail->ErrorInfo;
@@ -98,7 +97,7 @@ while($row = mysql_fetch_array($result))
             echo "Message sent to: ".$email."\n";
             mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
         }
-    else {  // email invalido. Vamos a poner generada = 2 para indicar que se generó pero no se mandó mail.
+    } else {  // email invalido. Vamos a poner generada = 2 para indicar que se generó pero no se mandó mail.
         echo "Generada pero el email es invalido\n";
         mysql_query("UPDATE constancias_generar SET generada = 2 where id = ".$constanciaId ) or die(mysql_error());      
     }
