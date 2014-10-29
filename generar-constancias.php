@@ -89,15 +89,20 @@ while($row = mysql_fetch_array($result))
     $mail->addAddress($email);     // add a recipient
     $mail->Body    = $message;
 
-    if(!$mail->Send()) {
-       echo 'Message could not be sent.';
-       echo 'Mailer Error: ' . $mail->ErrorInfo;
-       break;
-    } else {
-        echo "Message sent to: ".$email."\n";
-        mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
+    if (filter_var($email_a, FILTER_VALIDATE_EMAIL)
+        if(!$mail->Send()) {
+            echo "Message could not be sent.";
+            echo "Mailer Error: " . $mail->ErrorInfo;
+            continue;
+        } else {
+            echo "Message sent to: ".$email."\n";
+            mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
+        }
+    else {  // email invalido. Vamos a poner generada = 2 para indicar que se generó pero no se mandó mail.
+        echo "Generada pero el email es invalido\n";
+        mysql_query("UPDATE constancias_generar SET generada = 2 where id = ".$constanciaId ) or die(mysql_error());      
     }
-}
+} // while
 
 mysql_close();
 
