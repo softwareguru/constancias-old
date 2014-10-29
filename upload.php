@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Importar constancias para generar</title>
@@ -50,7 +49,7 @@ mysql_select_db(DBNAME);
 
 if (isset($_POST['submit'])) {
   if (is_uploaded_file($_FILES['filename']['tmp_name'])) {
-    echo "<h1>" . "Archivo ". $_FILES['filename']['name'] ." subido exitosamente." . "</h1>";
+    echo "<h2>" . "Archivo ". $_FILES['filename']['name'] ." subido exitosamente." . "</h2>";
     $handle = fopen($_FILES['filename']['tmp_name'], "r");
 
     $import = "INSERT into constancias_generar (template_id, nombre_participante, email, tag) VALUES \n";
@@ -61,6 +60,7 @@ if (isset($_POST['submit'])) {
     } // while
     $import = chop($import, ",\n");
 //    print "<pre>$import</pre>"; // Si quieres debuggear el query string.
+    mysql_query("SET NAMES 'utf8'") or die (mysql_error()); // si no, caracteres especiales se insertan mal en bd.
     mysql_query($import) or die(mysql_error());
     print "<p>Insert exitoso</p>";
     fclose($handle);
