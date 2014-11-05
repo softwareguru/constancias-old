@@ -22,7 +22,7 @@ nombre_evento, template_file, coords_x, coords_y
 from constancias_generar c, constancias_template t
 where c.template_id = t.id
 AND generada = 0
-limit 0, 50";
+limit 0, 20";
 
 $result=mysql_query($query_txt);
 
