@@ -22,7 +22,7 @@ nombre_evento, template_file, coords_x, coords_y
 from constancias_generar c, constancias_template t
 where c.template_id = t.id
 AND generada = 0
-limit 0, 20";
+limit 0, 100";
 
 $result=mysql_query($query_txt);
 
@@ -43,6 +43,7 @@ $message0 = "Te informamos que tu constancia ya fue generada.\n\n";
     $mail->isHTML(false);
 
 // Iterar por cada renglón
+
 while($row = mysql_fetch_array($result))
 {
     $constanciaId = $row["id"];
@@ -95,7 +96,7 @@ while($row = mysql_fetch_array($result))
             continue;
         } else {
             echo "Message sent to: ".$email."\n";
-            mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
+          mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
         }
     } else {  // email invalido. Vamos a poner generada = 2 para indicar que se generó pero no se mandó mail.
         echo "Generada pero el email es invalido\n";
