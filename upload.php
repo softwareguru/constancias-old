@@ -44,8 +44,7 @@ Ej:
 
 <?php
 require_once('constants.php');
-$conn = mysql_connect( DBHOST, DBUSER, DBPASS) or die ('Error connecting to mysql');
-mysql_select_db(DBNAME);
+$db = new PDO("mysql:host=".DBHOST.";dbname=".DBNAME, DBUSER, DBPASS, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
 
 if (isset($_POST['submit'])) {
   if (is_uploaded_file($_FILES['filename']['tmp_name'])) {
@@ -60,8 +59,7 @@ if (isset($_POST['submit'])) {
     } // while
     $import = chop($import, ",\n");
 //    print "<pre>$import</pre>"; // Si quieres debuggear el query string.
-    mysql_query("SET NAMES 'utf8'") or die (mysql_error()); // si no, caracteres especiales se insertan mal en bd.
-    mysql_query($import) or die(mysql_error());
+    $db->exec($import);
     print "<p>Insert exitoso</p>";
     fclose($handle);
   } // if

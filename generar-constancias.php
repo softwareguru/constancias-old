@@ -14,17 +14,12 @@ require_once('constants.php');
 
 <?php
 
-$conn = mysql_connect( DBHOST, DBUSER, DBPASS) or die ('Error connecting to mysql');
-mysql_select_db(DBNAME);
+$pdo = new PDO("mysql:host=".DBHOST.";dbname=".DBNAME, DBUSER, DBPASS, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
 
-$query_txt = "select c.id, nombre_participante as nombre, email, tag, 
-nombre_evento, template_file, coords_x, coords_y
-from constancias_generar c, constancias_template t
-where c.template_id = t.id
-AND generada = 0
-limit 0, 100";
-
-$result=mysql_query($query_txt);
+$query_text = "select c.id, nombre_participante as nombre, email, tag, "
+            ."nombre_evento, template_file, coords_x, coords_y "
+            ."from constancias_generar c, constancias_template t "
+            ."where c.template_id = t.id AND generada = 0 limit 0, 50";
 
 // Email template
 $subject = "Constancia de ";
@@ -44,7 +39,7 @@ $message0 = "Te informamos que tu constancia ya fue generada.\n\n";
 
 // Iterar por cada renglón
 
-while($row = mysql_fetch_array($result))
+foreach($pdo->query($query_text) as $row)
 {
     $constanciaId = $row["id"];
     $nombre = $row["nombre"];
@@ -55,19 +50,24 @@ while($row = mysql_fetch_array($result))
     $coordsX = $row["coords_x"];
     $coordsY = $row["coords_y"];
 
+    // Necesario porque FPDF no soporta UTF-8.
+    $nombre = iconv('UTF-8', 'windows-1252', $nombre);
+
     $absDir = RESULTSDIR."/".$tag;
     if (!file_exists($absDir)) {
         mkdir($absDir, 0755, true);
     }
 
-    $pdf =& new FPDI();
+    $pdf = new FPDI();
 
     $pagecount = $pdf->setSourceFile($templatePath);
     $tplidx = $pdf->importPage(1, '/MediaBox');
     $pdf->addPage("P", "Letter");
     $pdf->useTemplate($tplidx);
-    $pdf->AddFont('MrDafoe', '', 'MrDafoe.php');
-    $pdf->SetFont('MrDafoe','',32);
+
+//    $pdf->SetFont('Arial','B',16);
+    $pdf->AddFont('TangerineBold', '', 'Tangerine_Bold.php');
+    $pdf->SetFont('TangerineBold','',36);
 
     $pdf->SetXY((int)$coordsX,(int)$coordsY);
     $pdf->Cell(100, 0, $nombre, 0, 0,"C");
@@ -77,9 +77,12 @@ while($row = mysql_fetch_array($result))
     $absFilename = RESULTSDIR."/".$filename;
     $pdf->Output($absFilename, 'F');
 
+//  Descomentar la siguiente línea si no quieres mandar mails.
+//    $email = "nomandar";
+
     echo "Escribi ".$filename."\n<br />\n";
 
-    $filename = str_replace("%", "%25", $filename);
+    $filename = str_replace("%", "%25", $filename);;
 
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = $message0;
@@ -96,15 +99,14 @@ while($row = mysql_fetch_array($result))
             continue;
         } else {
             echo "Message sent to: ".$email."\n";
-          mysql_query("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId ) or die(mysql_error());
+          $pdo->exec("UPDATE constancias_generar SET generada = 1 where id = ".$constanciaId );
         }
     } else {  // email invalido. Vamos a poner generada = 2 para indicar que se generó pero no se mandó mail.
         echo "Generada pero el email es invalido\n";
-        mysql_query("UPDATE constancias_generar SET generada = 2 where id = ".$constanciaId ) or die(mysql_error());      
+        $pdo->exec("UPDATE constancias_generar SET generada = 2 where id = ".$constanciaId );
     }
-} // while
+} // for
 
-mysql_close();
 
 ?>
 <p>Constancias generadas.</p>
@@ -112,3 +114,4 @@ mysql_close();
 <p>Ver <a href="results/">aqui</a></p>
 </body>
 </html>
+
