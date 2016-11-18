@@ -4,13 +4,17 @@ The work is done by generar_constancias.php. It queries a db table and gets info
 
 Things to consider:
  - Modify constants.php with the proper values for your servers. 
- 
+
+- When you read the code, keep in mind that "constancia" is spanish for diploma. This may make things easier to understand :).
+
 - This uses the FPDF library to generate the PDF. If you want to do additional stuff with your PDF, look into the FPDF documentation (http://www.fpdf.org).
- 
+
  - You need to set up a web server and the directory where you save the diplomas needs to be configured so that it accessible through the web.
  
  - Templates need to be registered in a db table (yes, I currently do it through a manual query). No biggie for me, but you might want to add a web back-end to manage this. Registering the template basically consists of saying what event this diploma corresponds to, what is the name of the template file, and in which coordinates it should drop the name. You can do the math to determine the coordinates for your template, or you can simply do trial and error until you get it where you want :).
  
  - It is possible to use other fonts. First, you need the file in TCPDF format (a .php and .z file). There are several websites that do this conversion for free (ie http://www.xml-convert.com/en/convert-tff-font-to-afm-pfa-fpdf-tcpdf). Once you have the font files, put them under lib/fpdf/font and then change the code in generar_constancias.php that sets the font (I know, it shouldn't be hardcoded).
-  
+ 
+ - upload.php allows you to upload a csv file with the info of the diplomas that you want to generate. If you visit that file you will see the format/columns that the file needs. The template_id should match what you registered in the template table in the db (constancias_template).
+
 Pull requests are welcome, support requests will be ignored. No hard feelings, it is just how it is.
