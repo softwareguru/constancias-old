@@ -1,9 +1,27 @@
-Generador de constancias.
+Generates diplomas in bulk. Each diploma is saved as a PDF and the link is sent by email to the recipient. 
 
-El archivo que hay que invocar es generar_constancias.php. Aquí está lo que hace:
+The work is done by generar_constancias.php. It queries a db table and gets info of diplomas pending to be generated. Then, 
+for each diploma it grabs the corresponding template (which should be in the templates directory), adds the name of the person, 
+saves it in a directory and emails a link to it.
 
-1. Busca en una table de BD los nombres + emails de las personas a las que 
-hay que enviarles constancia.
-2. Toma una plantilla (PDF predisenado pero sin el nombre de la persona) y
-llena el nombre de la persona en las coordenadas correspondientes (hay que tantearle)
-3. Guarda el archivo generado y manda a la persona un mail con el link para que lo descargue.
+Things to consider:
+ - Modify constants.php with the proper values for your servers. 
+ 
+- This uses the FPDF library to generate the PDF. If you want to do additional stuff with your PDF, look into the 
+ FPDF documentation (http://www.fpdf.org).
+ 
+ - You need to set up a web server and the directory where you save the diplomas needs to be configured so 
+ that it accessible through the web.
+ 
+ - Templates need to be registered in a db table (yes, I currently do it through a manual query). No biggie for me, but you 
+ might want to add a web back-end to manage this. Registering the template basically consists of saying what event this diploma 
+ corresponds to, what is the name of the template file, and in which coordinates it should drop the name. You can do the math 
+ to determine the coordinates for your template, or you can simply do trial and error until you get it where you want :).
+ 
+ - It is possible to use other fonts. First, you need the file in TCPDF format (a .php and .z file). There are several websites 
+ that do this conversion for free (ie http://www.xml-convert.com/en/convert-tff-font-to-afm-pfa-fpdf-tcpdf). Once you have the 
+ font files, put them under lib/fpdf/font and then change the code in generar_constancias.php that sets the font (I know, it 
+ shouldn't be hardcoded).
+ 
+ 
+Pull requests are welcome, support requests will be ignored. No hard feelings, it is just how it is.
