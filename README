@@ -5,7 +5,7 @@ The work is done by generar_constancias.php. It queries a db table and gets info
 Things to consider:
  - Modify constants.php with the proper values for your servers. 
 
-- When you read the code, keep in mind that "constancia" is spanish for diploma. This may make things easier to understand :).
+- When you read the code, you will notice that some fields/vars are in spanish and others in english. Here is a quick crash course of words you may need to understand the code better: constancia -> diploma, nombre -> name. That's it.
 
 - This uses the FPDF library to generate the PDF. If you want to do additional stuff with your PDF, look into the FPDF documentation (http://www.fpdf.org).
 
