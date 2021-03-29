@@ -26,6 +26,7 @@ $subject = "Constancia de ";
 $message0 = "Te informamos que tu constancia ya fue generada.\n\n";
 
     $mail = new PHPMailer;
+    $mail->CharSet = "UTF-8";  // Charset for accents and special characters
     $mail->isSMTP();                                      // Set mailer to use SMTP
     $mail->Host = SMTPHOST;  // Specify main and backup SMTP servers
     $mail->SMTPAuth = true;                               // Enable SMTP authentication
@@ -64,10 +65,12 @@ foreach($pdo->query($query_text) as $row)
     $tplidx = $pdf->importPage(1, '/MediaBox');
     $pdf->addPage("P", "Letter");
     $pdf->useTemplate($tplidx);
+// fuentes extra
+//     $pdf->AddFont('helvetica, '', 'helvetica.php');
+//     $pdf->SetFont('helvetica','',36);
 
-//    $pdf->SetFont('Arial','B',16);
-    $pdf->AddFont('TangerineBold', '', 'Tangerine_Bold.php');
-    $pdf->SetFont('TangerineBold','',36);
+   $pdf->AddFont('TangerineBold', '', 'Tangerine_Bold.php');
+   $pdf->SetFont('TangerineBold','',34);
 
     $pdf->SetXY((int)$coordsX,(int)$coordsY);
     $pdf->Cell(100, 0, $nombre, 0, 0,"C");
@@ -86,7 +89,7 @@ foreach($pdo->query($query_text) as $row)
 
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = $message0;
-        $message .= "Puedes descargarla en ".BASEURL."/".$filename;
+	$message .= "Puedes descargar tu constancia  en ".BASEURL."/".$filename;
         $message .= "\n\nAtentamente,\n Staff SG";
         $mail->Subject = "Constancia de ".$nombreEvento;
         $mail->clearAddresses();       // remove previous recipient
