@@ -75,7 +75,7 @@ foreach($pdo->query($query_text) as $row)
     $pdf->SetXY((int)$coordsX,(int)$coordsY);
     $pdf->Cell(100, 0, $nombre, 0, 0,"C");
 
-    $pdf->setDisplayMode("real");
+    $pdf->setDisplayMode("real", "single");
     $filename = $tag."/".urlencode($nombre).".pdf";
     $absFilename = RESULTSDIR."/".$filename;
     $pdf->Output($absFilename, 'F');
